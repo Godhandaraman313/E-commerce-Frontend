@@ -1,0 +1,59 @@
+.dashboard {
+  padding: 30px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.dashboard-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.logout-btn {
+  padding: 10px 15px;
+  background: crimson;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.product-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.product-input input {
+  padding: 10px;
+  flex: 1;
+}
+
+.product-input button {
+  padding: 10px 20px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+}
+
+.product-list {
+  list-style: none;
+}
+
+.product-item {
+  background: white;
+  padding: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 8px;
+}
+
+.product-actions button {
+  margin-left: 10px;
+}
