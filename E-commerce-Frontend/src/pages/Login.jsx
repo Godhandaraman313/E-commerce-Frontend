@@ -1,84 +1,57 @@
 import { useState } from "react";
-import { loginUser } from "../services/authService";
+import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import "../styles/auth.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      alert("Please enter email and password");
-      return;
-    }
-
     try {
-      setLoading(true);
+      const res = await axios.post(
+        "http://localhost:8282/api/auth/login",
+        { email, password }
+      );
 
-      const res = await loginUser({ email, password });
+      // ✅ FIX: store only user object
+      localStorage.setItem("user", JSON.stringify(res.data.data));
 
-      // Store user session
-      localStorage.setItem("user", JSON.stringify(res.data));
-
-      // Redirect to dashboard
-      navigate("/products");
-
+      navigate("/");
     } catch (err) {
-      alert(err.response?.data || "Invalid credentials");
-    } finally {
-      setLoading(false);
+      alert("Login failed");
     }
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-wrapper">
       <div className="auth-card">
-
-        <h2>Welcome Back 👋</h2>
-        <p style={{ marginBottom: "20px", color: "#666" }}>
-          Login to your account
-        </p>
+        <h2>Kaimart Login</h2>
 
         <input
-          className="auth-input"
-          type="email"
-          placeholder="Enter email"
+          placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
-          className="auth-input"
           type="password"
-          placeholder="Enter password"
+          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button
-          className="auth-btn"
-          onClick={handleLogin}
-          disabled={loading}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+        <button onClick={handleLogin}>Login</button>
 
-        {/* Extra Links */}
-        <div style={{ marginTop: "15px" }}>
-          <p>
-            Don’t have an account?{" "}
-            <Link to="/register">Register</Link>
-          </p>
+        <p>
+          New user? <Link className="link" to="/register">Register</Link>
+        </p>
 
-          <p>
-            <Link to="/forgot-password">Forgot Password?</Link>
-          </p>
-        </div>
-
+        <p>
+          <Link className="link" to="/forgot-password">Forgot Password?</Link>
+        </p>
       </div>
     </div>
   );

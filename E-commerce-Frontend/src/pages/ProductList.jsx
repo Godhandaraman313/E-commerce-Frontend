@@ -1,120 +1,136 @@
-import "../styles/dashboard.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "../styles/dashboard.css";
 
-function ProductList() {
+export default function ProductList() {
   const [products, setProducts] = useState([]);
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
   const [editId, setEditId] = useState(null);
 
-  const navigate = useNavigate();
+  // ✅ NEW STATES
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
+  const navigate = useNavigate();
   const API = "http://localhost:8282/api/products";
 
   // 🔒 Protect route
   useEffect(() => {
     const user = localStorage.getItem("user");
-    if (!user) {
-      navigate("/");
-    }
-  }, [navigate]);
+    if (!user) navigate("/login");
+  }, []);
 
-  // 📥 Fetch products
   const fetchProducts = async () => {
-    try {
-      const res = await axios.get(API);
-      setProducts(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+    const res = await axios.get(API);
+    setProducts(res.data);
   };
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // ➕ Add / Update
   const handleSubmit = async () => {
-    if (!name.trim()) return;
-
-    try {
-      if (editId) {
-        // UPDATE
-        await axios.put(`${API}/${editId}`, { name });
-        setEditId(null);
-      } else {
-        // CREATE
-        await axios.post(API, { name });
-      }
-
-      setName("");
-      fetchProducts();
-
-    } catch (err) {
-      console.error(err);
+    if (editId) {
+      await axios.put(`${API}/${editId}`, { name, category });
+    } else {
+      await axios.post(API, { name, category });
     }
+
+    setName("");
+    setCategory("");
+    setEditId(null);
+    fetchProducts();
   };
 
-  // ❌ Delete
   const handleDelete = async (id) => {
-    try {
-      await axios.delete(`${API}/${id}`);
-      fetchProducts();
-    } catch (err) {
-      console.error(err);
-    }
+    await axios.delete(`${API}/${id}`);
+    fetchProducts();
   };
 
-  // ✏️ Edit
-  const handleEdit = (product) => {
-    setName(product.name);
-    setEditId(product.id);
-  };
+  // ✅ SEARCH FILTER
+  const filteredProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-  // 🚪 Logout
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
-  };
+  // ✅ PAGINATION LOGIC
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirst, indexOfLast);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   return (
-  <div className="dashboard">
+    <div className="dashboard">
+      <h2>Product Dashboard</h2>
 
-    <div className="dashboard-header">
-      <h2 className="dashboard-title">Products</h2>
-      <button className="logout-btn" onClick={handleLogout}>
-        Logout
-      </button>
-    </div>
-
-    <div className="product-input">
+      {/* 🔍 SEARCH */}
       <input
-        type="text"
-        placeholder="Enter product"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        placeholder="Search product..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ marginBottom: "20px", padding: "10px" }}
       />
-      <button onClick={handleSubmit}>
-        {editId ? "Update" : "Add"}
-      </button>
-    </div>
 
-    <ul className="product-list">
-      {products.map((p) => (
-        <li key={p.id} className="product-item">
-          {p.name}
+      {/* FORM */}
+      <div className="form">
+        <input
+          value={name}
+          placeholder="Name"
+          onChange={(e) => setName(e.target.value)}
+        />
 
-          <div className="product-actions">
-            <button onClick={() => handleEdit(p)}>Edit</button>
-            <button onClick={() => handleDelete(p.id)}>Delete</button>
+        <input
+          value={category}
+          placeholder="Category"
+          onChange={(e) => setCategory(e.target.value)}
+        />
+
+        <button onClick={handleSubmit}>
+          {editId ? "Update" : "Add"}
+        </button>
+      </div>
+
+      {/* PRODUCTS */}
+      <div className="grid">
+        {currentProducts.map((p) => (
+          <div className="product-card" key={p.id}>
+            <h3>{p.name}</h3>
+            <p>{p.category}</p>
+
+            <button onClick={() => {
+              setName(p.name);
+              setCategory(p.category);
+              setEditId(p.id);
+            }}>
+              Edit
+            </button>
+
+            <button onClick={() => handleDelete(p.id)}>
+              Delete
+            </button>
           </div>
-        </li>
-      ))}
-    </ul>
+        ))}
+      </div>
 
-  </div>
-);
+      {/* 📄 PAGINATION */}
+      <div style={{ marginTop: "20px" }}>
+        {[...Array(totalPages)].map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i + 1)}
+            style={{
+              margin: "5px",
+              padding: "8px",
+              background: currentPage === i + 1 ? "#ff6600" : "#ccc"
+            }}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
-
-export default ProductList;

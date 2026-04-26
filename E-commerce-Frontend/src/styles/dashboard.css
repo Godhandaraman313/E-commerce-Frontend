@@ -1,59 +1,29 @@
 .dashboard {
-  padding: 30px;
+  padding: 40px;
+  text-align: center;
 }
 
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.dashboard-title {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.logout-btn {
-  padding: 10px 15px;
-  background: crimson;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.product-input {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.product-input input {
+.form input {
   padding: 10px;
-  flex: 1;
+  margin-right: 10px;
 }
 
-.product-input button {
-  padding: 10px 20px;
-  background: #4f46e5;
-  color: white;
+.form button {
+  padding: 10px;
+  background: #ff6600;
   border: none;
-  border-radius: 6px;
+  color: white;
 }
 
-.product-list {
-  list-style: none;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 20px;
+  margin-top: 20px;
 }
 
-.product-item {
-  background: white;
-  padding: 15px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  border-radius: 8px;
-}
-
-.product-actions button {
-  margin-left: 10px;
+.product-card {
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.1);
 }
