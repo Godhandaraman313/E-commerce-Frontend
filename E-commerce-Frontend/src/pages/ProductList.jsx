@@ -1,120 +1,234 @@
-import "../styles/dashboard.css";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import API from "../api/api";
+import "../styles/dashboard.css";
 
-function ProductList() {
+export default function ProductList() {
+
   const [products, setProducts] = useState([]);
+
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
+  const [price, setPrice] = useState("");
   const [editId, setEditId] = useState(null);
 
-  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
 
-  const API = "http://localhost:8282/api/products";
+  const [page, setPage] = useState(0);
+  const [size] = useState(5);
+  const [totalPages, setTotalPages] = useState(0);
 
-  // 🔒 Protect route
+  const [sortKey, setSortKey] = useState("id");
+  const [direction, setDirection] = useState("asc");
+
+  const [loading, setLoading] = useState(false);
+
+  // ✅ NEW STATE (important)
+  const [showForm, setShowForm] = useState(false);
+
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) {
-      navigate("/");
-    }
-  }, [navigate]);
+    const delay = setTimeout(() => {
+      fetchProducts();
+    }, 400);
 
-  // 📥 Fetch products
+    return () => clearTimeout(delay);
+  }, [page, sortKey, direction, search, filterCategory]);
+
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(API);
-      setProducts(res.data);
+      setLoading(true);
+
+      const res = await API.get("/api/products", {
+        params: {
+          page,
+          size,
+          search,
+          category: filterCategory,
+          sort: `${sortKey},${direction}`,
+        },
+      });
+
+      setProducts(res.data.content);
+      setTotalPages(res.data.totalPages);
+
     } catch (err) {
-      console.error(err);
+      alert(err.response?.data?.message || "Failed to load products");
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  // ➕ Add / Update
   const handleSubmit = async () => {
-    if (!name.trim()) return;
+    if (!name || !category || !price) {
+      alert("All fields required");
+      return;
+    }
+
+    const payload = {
+      name,
+      category: category.toLowerCase(),
+      price: Number(price),
+    };
 
     try {
       if (editId) {
-        // UPDATE
-        await axios.put(`${API}/${editId}`, { name });
-        setEditId(null);
+        await API.put(`/api/products/${editId}`, payload);
       } else {
-        // CREATE
-        await axios.post(API, { name });
+        await API.post("/api/products", payload);
       }
 
       setName("");
+      setCategory("");
+      setPrice("");
+      setEditId(null);
+
+      // ✅ CLOSE FORM AFTER SAVE
+      setShowForm(false);
+
       fetchProducts();
 
     } catch (err) {
-      console.error(err);
+      alert(err.response?.data?.message || "Operation failed");
     }
   };
 
-  // ❌ Delete
   const handleDelete = async (id) => {
+    if (!window.confirm("Delete this product?")) return;
+
     try {
-      await axios.delete(`${API}/${id}`);
+      await API.delete(`/api/products/${id}`);
       fetchProducts();
     } catch (err) {
-      console.error(err);
+      alert(err.response?.data?.message || "Delete failed");
     }
   };
 
-  // ✏️ Edit
-  const handleEdit = (product) => {
-    setName(product.name);
-    setEditId(product.id);
-  };
-
-  // 🚪 Logout
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setDirection(direction === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setDirection("asc");
+    }
   };
 
   return (
-  <div className="dashboard">
+    <div className="dashboard">
 
-    <div className="dashboard-header">
-      <h2 className="dashboard-title">Products</h2>
-      <button className="logout-btn" onClick={handleLogout}>
-        Logout
-      </button>
+      <h1 className="title">Product Dashboard</h1>
+
+      {/* ✅ FLOATING ADD BUTTON */}
+      <div className="headerRow">
+  <h1 className="title">Product Dashboard</h1>
+
+  <button
+    className="addTopBtn"
+    onClick={() => {
+      setShowForm(!showForm);
+      setEditId(null);
+      setName("");
+      setCategory("");
+      setPrice("");
+    }}
+  >
+    {showForm ? "Close" : "Add Product"}
+  </button>
+</div>
+
+      {/* SEARCH + FILTER */}
+      <div className="topControls">
+        <input
+          placeholder="Search product..."
+          value={search}
+          onChange={(e) => {
+            setPage(0);
+            setSearch(e.target.value);
+          }}
+        />
+
+        <input
+          placeholder="Filter category..."
+          value={filterCategory}
+          onChange={(e) => {
+            setPage(0);
+            setFilterCategory(e.target.value);
+          }}
+        />
+      </div>
+
+      {/* ✅ CONDITIONAL FORM */}
+      {showForm && (
+        <div className="formBox">
+          <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+          <input placeholder="Category" value={category} onChange={(e) => setCategory(e.target.value)} />
+          <input type="number" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
+
+          <button onClick={handleSubmit}>
+            {editId ? "Update" : "Add"}
+          </button>
+        </div>
+      )}
+
+      {/* TABLE */}
+      {loading ? (
+        <p>Loading...</p>
+      ) : products.length === 0 ? (
+        <p>No products found</p>
+      ) : (
+        <div className="tableWrapper">
+          <table className="product-table">
+            <thead>
+              <tr>
+                <th onClick={() => handleSort("id")}>ID</th>
+                <th onClick={() => handleSort("name")}>Name</th>
+                <th onClick={() => handleSort("category")}>Category</th>
+                <th onClick={() => handleSort("price")}>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {products.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.id}</td>
+                  <td>{p.name}</td>
+                  <td className="categoryCell">{p.category}</td>
+                  <td>₹{p.price}</td>
+                  <td>
+                    <button
+                      className="editBtn"
+                      onClick={() => {
+                        setName(p.name);
+                        setCategory(p.category);
+                        setPrice(p.price);
+                        setEditId(p.id);
+                        setShowForm(true); // ✅ open form on edit
+                      }}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="deleteBtn"
+                      onClick={() => handleDelete(p.id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* PAGINATION */}
+      <div className="pagination">
+        <button disabled={page === 0} onClick={() => setPage(page - 1)}>Prev</button>
+        <span className="pageInfo"> Page {page + 1} / {totalPages} </span>
+        <button disabled={page === totalPages - 1} onClick={() => setPage(page + 1)}>Next</button>
+      </div>
+
     </div>
-
-    <div className="product-input">
-      <input
-        type="text"
-        placeholder="Enter product"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <button onClick={handleSubmit}>
-        {editId ? "Update" : "Add"}
-      </button>
-    </div>
-
-    <ul className="product-list">
-      {products.map((p) => (
-        <li key={p.id} className="product-item">
-          {p.name}
-
-          <div className="product-actions">
-            <button onClick={() => handleEdit(p)}>Edit</button>
-            <button onClick={() => handleDelete(p.id)}>Delete</button>
-          </div>
-        </li>
-      ))}
-    </ul>
-
-  </div>
-);
+  );
 }
-
-export default ProductList;
