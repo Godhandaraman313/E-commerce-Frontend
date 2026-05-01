@@ -1,29 +1,243 @@
+/* =========================
+   PAGE BASE (DARK THEME)
+========================= */
 .dashboard {
-  padding: 40px;
+  padding: 40px 80px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #020617, #0f172a);
+  color: #e2e8f0;
+}
+
+/* =========================
+   TITLE
+========================= */
+.title {
   text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  font-style: italic;
+  color: #f1f5f9;
+  margin-bottom: 25px;
 }
 
-.form input {
-  padding: 10px;
-  margin-right: 10px;
-}
-
-.form button {
-  padding: 10px;
-  background: #ff6600;
-  border: none;
-  color: white;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+/* =========================
+   SEARCH + FILTER
+========================= */
+.topControls {
+  display: flex;
+  justify-content: center;
   gap: 20px;
-  margin-top: 20px;
+  margin-bottom: 25px;
 }
 
-.product-card {
+.topControls input {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: white;
+  width: 220px;
+  font-style: italic;
+  transition: 0.2s;
+}
+
+.topControls input:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
+}
+
+/* =========================
+   FORM
+========================= */
+.formBox {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.formBox input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: white;
+  width: 180px;
+}
+
+.formBox button {
+  background: linear-gradient(90deg, #ff6600, #ff3300);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.formBox button:hover {
+  transform: scale(1.05);
+}
+
+/* =========================
+   TABLE WRAPPER (GLASS UI)
+========================= */
+.tableWrapper {
+  background: rgba(255, 255, 255, 0.05);
   padding: 20px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.1);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+
+/* =========================
+   TABLE
+========================= */
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* HEADER */
+.product-table th {
+  background: linear-gradient(90deg, #1e293b, #334155);
+  color: #f8fafc;
+  padding: 14px;
+  text-align: left;
+  font-weight: bold;
+  font-style: italic;
+  cursor: pointer;
+}
+
+/* BODY */
+.product-table td {
+  padding: 14px;
+  border-bottom: 1px solid #1e293b;
+  font-size: 15px;
+}
+
+/* ROW HOVER */
+.product-table tr:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* =========================
+   TEXT STYLING
+========================= */
+
+/* NAME */
+.product-table td:nth-child(2) {
+  font-weight: bold;
+  color: #f1f5f9;
+}
+
+/* CATEGORY → 🔥 BOLD + ITALIC */
+.product-table td:nth-child(3) {
+  font-weight: bold;
+  font-style: italic;
+  color: #94a3b8;
+}
+
+/* PRICE (NO GREEN) */
+.product-table td:nth-child(4) {
+  font-weight: bold;
+  color: #facc15; /* subtle gold */
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.editBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  margin-right: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.deleteBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+/* =========================
+   PAGINATION (FIXED)
+========================= */
+.pagination {
+  display: flex;
+  justify-content: center;   /* ✅ center align */
+  align-items: center;
+  gap: 15px;                /* spacing between elements */
+  margin-top: 30px;
+}
+
+/* PAGE TEXT */
+.pagination span {
+  font-weight: bold;
+  font-style: italic;
+  color: #e2e8f0;
+}
+
+/* BUTTON BASE */
+.pagination button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* HOVER */
+.pagination button:hover:not(:disabled) {
+  background: #38bdf8;
+  color: black;
+  transform: scale(1.05);
+}
+
+/* DISABLED STATE */
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ACTIVE BUTTON STYLE (optional improvement) */
+.pagination button.active {
+  background: #38bdf8;
+  color: black;
+  font-weight: bold;
+}
+
+/* HEADER ROW (TITLE + BUTTON) */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+/* ADD BUTTON TOP RIGHT */
+.addTopBtn {
+  background: linear-gradient(135deg,#ff6600,#ff3300);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.addTopBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(255, 102, 0, 0.6);
 }
