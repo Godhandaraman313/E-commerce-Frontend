@@ -128,8 +128,4 @@ export function SearchForm({ onSearch }) {
     </form>
   );
 }
-
-// Utility Function
-export function formatCurrency(amount) {
-  return `₹${amount.toLocaleString("en-IN")}`;
-}
+

@@ -1,19 +1,27 @@
-/* =========================
-   GLOBAL BASE
-========================= */
-body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-  /* 🔥 FIXED BACKGROUND */
-  background: #f1f3f6;
-
-  color: #212121;
+:root {
+  --primary-color: #ff9900;
+  --primary-hover: #e38800;
+  --secondary-color: #232f3e;
+  --bg-color: #f1f3f6;
+  --text-dark: #212121;
+  --text-light: #f8f9fa;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
 }
 
-/* =========================
-   LAYOUT SYSTEM
-========================= */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 50%, #f0f2f5 100%);
+  background-attachment: fixed;
+  color: var(--text-dark);
+}
+
 .appLayout {
   display: flex;
   flex-direction: column;
@@ -22,114 +30,203 @@ body {
 
 .mainContent {
   flex: 1;
-  padding: 20px;
+  padding: 0;
+  position: relative;
 }
 
-/* =========================
-   HEADER (optional override)
-========================= */
+/* Subtle dot pattern overlay for depth */
+.mainContent::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(circle, #d4d5d9 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mainContent > * {
+  position: relative;
+  z-index: 1;
+}
+
 .navbar {
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background-color: var(--secondary-color) !important;
+  box-shadow: var(--shadow-md);
+  padding: 10px 20px;
 }
 
-/* =========================
-   FOOTER
-========================= */
+.navbar .nav-link, .navbar .navbar-brand {
+  color: var(--text-light) !important;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.navbar .nav-link:hover {
+  opacity: 0.8;
+}
+
 .footer {
   text-align: center;
-  padding: 15px;
-  background: #111;
-  color: white;
+  padding: 20px;
+  background: var(--secondary-color);
+  color: var(--text-light);
   font-size: 14px;
 }
 
-/* =========================
-   AUTH UI (KEEP ORIGINAL STYLE)
-========================= */
+/* AUTH UI */
 .auth-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-
-  /* 🔥 separate background for auth pages */
-  background: linear-gradient(135deg, #0f172a, #020617);
+  min-height: calc(100vh - 140px);
+  background: var(--bg-color);
+  padding: 20px;
 }
 
-/* CARD */
 .auth-card {
-  width: 350px;
+  width: 100%;
+  max-width: 400px;
   padding: 40px;
-  border-radius: 16px;
-
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px);
-
+  border-radius: 12px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
   text-align: center;
-  animation: fadeIn 0.6s ease;
+  animation: fadeIn 0.4s ease-out;
 }
 
-/* INPUT */
+.auth-card h2 {
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
 .auth-card input {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   margin: 10px 0;
-
   border-radius: 8px;
-  border: none;
+  border: 1px solid var(--border-color);
   outline: none;
+  font-size: 14px;
+  transition: border-color 0.2s;
 }
 
-/* BUTTON */
+.auth-card input:focus {
+  border-color: var(--primary-color);
+}
+
 .auth-card button {
   width: 100%;
-  padding: 12px;
-
-  background: linear-gradient(90deg,#ff6600,#ff3300);
-
+  padding: 14px;
+  background: var(--primary-color);
   border: none;
   border-radius: 8px;
-
   color: white;
+  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
-
-  margin-top: 10px;
-  transition: 0.3s;
+  margin-top: 16px;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .auth-card button:hover {
-  transform: scale(1.05);
+  background: var(--primary-hover);
+  transform: translateY(-2px);
 }
 
-/* LINKS */
 .link {
-  color: #38bdf8;
+  color: #007bff;
   cursor: pointer;
+  text-decoration: none;
 }
 
-/* =========================
-   BUTTON COMMON STYLE
-========================= */
 .btn {
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s;
 }
 
-.btn:hover {
-  transform: scale(1.03);
-}
-
-/* =========================
-   ANIMATION
-========================= */
 @keyframes fadeIn {
-  from { 
-    opacity: 0; 
-    transform: translateY(30px);
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* PREMIUM E-COMMERCE UI (AJIO / NYKAA / MYNTRA STYLE) */
+.card {
+  border-radius: 0; /* Sharp edges */
+  border: 1px solid #eaeaec;
+  box-shadow: none;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #eaeaec;
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+.btn {
+  border-radius: 0; /* Sharp edges */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  padding: 0.6rem 1.5rem;
+}
+
+.btn-primary {
+  background-color: #000;
+  border-color: #000;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #333;
+  border-color: #333;
+}
+
+.btn-outline-dark {
+  border-color: #d4d5d9;
+  color: #282c3f;
+}
+
+.btn-outline-dark:hover {
+  border-color: #282c3f;
+  background-color: transparent;
+  color: #282c3f;
+}
+
+.form-control, .form-select {
+  border-radius: 0;
+  border: 1px solid #d4d5d9;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #282c3f;
+  box-shadow: none;
+}
+
+.badge {
+  border-radius: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 0.4em 0.6em;
 }

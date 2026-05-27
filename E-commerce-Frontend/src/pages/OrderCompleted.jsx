@@ -1,22 +1,24 @@
-// OrderCompleted.jsx  (from order_completed.html :contentReference[oaicite:1]{index=1})
-
-//import Header from "../components/Header";
-//import SearchNav from "../components/SearchNav";
-//mport Footer from "../components/Footer";
+import { Link } from "react-router-dom";
 
 export default function OrderCompleted() {
   return (
     <div className="container-fluid">
-      <Header />
-      <SearchNav />
-
-      <div className="text-center border border-secondary rounded m-3 p-3">
+      <div className="text-center border border-secondary rounded m-3 p-5">
         <h2>Your Order has been Completed!</h2>
-        <h4>A confirmation email has been sent to you.</h4>
-        <h4>Kindly check your email for the details.</h4>
+        <h4 className="mt-3">Thank you for shopping with Kaimart.</h4>
+        <p className="text-muted">Your cart has been cleared after placing the order.</p>
+        <div className="mt-4 d-flex gap-2 justify-content-center">
+          <Link to="/" className="btn btn-primary">
+            Continue Shopping
+          </Link>
+          <Link to="/orders" className="btn btn-outline-secondary">
+            My Orders
+          </Link>
+          <Link to="/" className="btn btn-outline-secondary">
+            Home
+          </Link>
+        </div>
       </div>
-
-      <Footer />
     </div>
   );
 }

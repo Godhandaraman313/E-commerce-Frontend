@@ -1,0 +1,180 @@
+/* ===== Product Detail Page – Amazon/Flipkart Style ===== */
+
+.product-detail {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  background: transparent;
+}
+
+.product-detail--error {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+.product-detail--error p {
+  color: #ef4444;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+.product-detail__status {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.1rem;
+  color: #64748b;
+}
+
+/* Breadcrumb */
+.product-detail__breadcrumb {
+  font-size: 0.82rem;
+  color: #565959;
+  margin-bottom: 16px;
+}
+.product-detail__breadcrumb a {
+  color: #007185;
+  text-decoration: none;
+}
+.product-detail__breadcrumb a:hover {
+  text-decoration: underline;
+  color: #c45500;
+}
+.product-detail__breadcrumb span {
+  margin: 0 2px;
+}
+
+/* 3-Column Grid Layout */
+.product-detail__layout {
+  display: grid;
+  grid-template-columns: minmax(380px, 480px) minmax(280px, 1fr) 280px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Column 1: Gallery */
+.product-detail__gallery {
+  background: #fff;
+  border: 1px solid #e3e6e6;
+  border-radius: 8px;
+  padding: 12px;
+  position: sticky;
+  top: 20px;
+}
+
+/* Column 2: Info */
+.product-detail__info {
+  background: #fff;
+  border: 1px solid #e3e6e6;
+  border-radius: 8px;
+  padding: 24px;
+}
+.product-detail__info h1 {
+  font-size: 1.45rem;
+  font-weight: 500;
+  line-height: 1.35;
+  margin-bottom: 6px;
+  color: #0f1111;
+}
+
+/* Rating Link */
+.product-detail__rating-link {
+  text-decoration: none;
+  font-size: 0.88rem;
+  color: #007185;
+  display: inline-flex;
+  align-items: center;
+}
+.product-detail__rating-link:hover {
+  color: #c45500;
+}
+.product-detail__stars {
+  color: #ffa41c;
+  font-size: 1.15rem;
+  letter-spacing: 1px;
+}
+
+/* Price Block */
+.product-detail__price-block span {
+  color: #b12704;
+}
+
+/* Specification Table */
+.product-detail__specs {
+  margin-bottom: 0;
+}
+.spec-table {
+  font-size: 0.88rem;
+  margin-bottom: 0;
+}
+.spec-label {
+  font-weight: 600;
+  color: #0f1111;
+  width: 160px;
+  background: #f3f3f3;
+  padding: 8px 12px !important;
+  vertical-align: middle;
+}
+.spec-value {
+  color: #333;
+  padding: 8px 12px !important;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Description Block */
+.product-detail__desc-block {
+  margin-bottom: 0;
+}
+.product-detail__desc-list {
+  padding-left: 20px;
+  font-size: 0.9rem;
+  color: #0f1111;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+.product-detail__desc-list li {
+  margin-bottom: 6px;
+}
+
+/* Column 3: Buy Box */
+.product-detail__buybox {
+  position: sticky;
+  top: 20px;
+}
+.buybox-card {
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  padding: 18px;
+  background: #fff;
+}
+.buybox-price {
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: #b12704;
+  margin-bottom: 8px;
+}
+
+/* Reviews Section */
+.product-detail__reviews-section {
+  max-width: 900px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1100px) {
+  .product-detail__layout {
+    grid-template-columns: 1fr 280px;
+  }
+  .product-detail__gallery {
+    grid-column: 1 / -1;
+    position: static;
+    max-height: 450px;
+  }
+}
+@media (max-width: 768px) {
+  .product-detail__layout {
+    grid-template-columns: 1fr;
+  }
+  .product-detail__buybox {
+    position: static;
+  }
+  .product-detail__gallery {
+    max-height: 350px;
+  }
+}

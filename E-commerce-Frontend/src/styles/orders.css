@@ -1,0 +1,18 @@
+.orders-page h2 {
+  font-weight: 700;
+}
+
+.orders-page__search {
+  max-width: 480px;
+}
+
+.orders-page .nav-tabs .nav-link {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.orders-page .nav-tabs .nav-link.active {
+  font-weight: 600;
+  border-bottom: 2px solid #0d6efd;
+}

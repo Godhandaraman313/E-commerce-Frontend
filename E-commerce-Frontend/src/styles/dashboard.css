@@ -18,6 +18,7 @@
   font-style: italic;
   color: #f1f5f9;
   margin-bottom: 25px;
+  flex: 1;
 }
 
 /* =========================
@@ -53,17 +54,38 @@
 .formBox {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 15px;
   margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 25px;
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
 }
 
-.formBox input {
+.formBox input:not([type="checkbox"]):not([type="file"]),
+.formBox select,
+.formBox textarea {
   padding: 12px;
   border-radius: 8px;
   border: 1px solid #334155;
   background: #0f172a;
   color: white;
   width: 180px;
+}
+
+.formBox textarea {
+  width: 300px;
+  resize: vertical;
+}
+
+.formBox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e2e8f0;
+  font-weight: bold;
 }
 
 .formBox button {

@@ -1,4 +1,5 @@
 import Header from "./Header";
+
 import Footer from "./Footer";
 import { useState, useEffect } from "react";
 
@@ -9,7 +10,7 @@ export default function Layout({ children }) {
     const stored = localStorage.getItem("user");
     if (stored) {
       const parsed = JSON.parse(stored);
-      setUser(parsed.username);
+      setUser(parsed.firstName || parsed.username || parsed.email);
     }
   }, []);
 
@@ -18,10 +19,13 @@ export default function Layout({ children }) {
     window.location.href = "/login";
   };
 
+  // Hide Header on /login and /register routes
+  const hideHeader = ["/login", "/register"].includes(window.location.pathname);
+
   return (
     <div className="appLayout">
 
-      <Header user={user} handleLogout={handleLogout} />
+      {!hideHeader && <Header user={user} handleLogout={handleLogout} />}
 
       <main className="mainContent">
         {children}

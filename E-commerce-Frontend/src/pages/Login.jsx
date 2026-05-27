@@ -24,15 +24,20 @@ export default function Login() {
         password,
       });
 
-      const { token, username, email: userEmail } = res.data;
+      const { accessToken, username, email: userEmail, role, firstName } = res.data;
 
-      localStorage.setItem("token", token);
+      localStorage.setItem("token", accessToken);
       localStorage.setItem(
         "user",
-        JSON.stringify({ username, email: userEmail })
+        JSON.stringify({ firstName, username, email: userEmail, role: role || "CUSTOMER" })
       );
 
-      window.location.href = from; // ✅ SMART redirect
+      if ((role || "").toUpperCase() === "ADMIN") {
+        window.location.href = "/admin/orders";
+        return;
+      }
+
+      window.location.href = from;
 
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");

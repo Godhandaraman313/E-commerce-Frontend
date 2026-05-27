@@ -1,0 +1,39 @@
+.admin-orders__card {
+  border-left: 4px solid #0d6efd;
+}
+
+.admin-orders__steps {
+  max-width: 360px;
+}
+
+.admin-orders__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 22px;
+  border: none;
+}
+
+.admin-orders__step--done {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.admin-orders__step--action {
+  background: #f1f5f9;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.admin-orders__step--action:hover:not(:disabled) {
+  background: #dbeafe;
+  transform: scale(1.08);
+}
+
+.admin-orders__step--action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

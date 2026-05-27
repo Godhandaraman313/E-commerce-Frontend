@@ -1,0 +1,14 @@
+.cart-page__item img {
+  object-fit: cover;
+}
+
+.cart-page__total {
+  font-weight: 700;
+  margin-top: 16px;
+}
+
+.quantity-control__value {
+  min-width: 32px;
+  text-align: center;
+  font-weight: 600;
+}
