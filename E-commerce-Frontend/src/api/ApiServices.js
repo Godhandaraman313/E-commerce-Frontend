@@ -57,6 +57,22 @@ export const ProductAPI = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
+  exportCsv: (params) =>
+    API.get("/api/products/export", {
+      params,
+      responseType: "blob",
+    }),
+  downloadImportTemplate: () =>
+    API.get("/api/products/import-template", {
+      responseType: "blob",
+    }),
+  importCsv: (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return API.post("/api/products/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
   deleteThumbnail: (id) => API.delete(`/api/products/${id}/image`),
   deleteExtraImage: (id, imagePath) => API.delete(`/api/products/${id}/extra-images`, { params: { imagePath } }),
 };

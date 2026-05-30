@@ -35,6 +35,9 @@ export default function ProductList() {
 
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvPreview, setCsvPreview] = useState({ headers: [], rows: [] });
+  const [importingCsv, setImportingCsv] = useState(false);
 
   const { addToCart } = useCart();
 
@@ -189,6 +192,114 @@ export default function ProductList() {
     }
   };
 
+  const parseCsvLine = (line) => {
+    const values = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === "," && !inQuotes) {
+        values.push(current);
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+
+    values.push(current);
+    return values;
+  };
+
+  const triggerCsvDownload = (blob, fileName) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadExport = async () => {
+    try {
+      const res = await ProductAPI.exportCsv({
+        search,
+        category: filterCategory,
+      });
+      triggerCsvDownload(res.data, "products-export.csv");
+    } catch (err) {
+      alert(err.response?.data?.message || "CSV export failed");
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const res = await ProductAPI.downloadImportTemplate();
+      triggerCsvDownload(res.data, "products-template.csv");
+    } catch (err) {
+      alert(err.response?.data?.message || "Template download failed");
+    }
+  };
+
+  const handleCsvSelect = async (file) => {
+    setCsvFile(file || null);
+    if (!file) {
+      setCsvPreview({ headers: [], rows: [] });
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter((l) => l.trim() !== "");
+      if (lines.length === 0) {
+        setCsvPreview({ headers: [], rows: [] });
+        return;
+      }
+      const headers = parseCsvLine(lines[0]);
+      const rows = lines.slice(1, 9).map((line) => parseCsvLine(line));
+      setCsvPreview({ headers, rows });
+    } catch {
+      setCsvPreview({ headers: [], rows: [] });
+      alert("Unable to preview CSV file");
+    }
+  };
+
+  const handleImportCsv = async () => {
+    if (!csvFile) {
+      alert("Select a CSV file first");
+      return;
+    }
+    if (!window.confirm("Import CSV now? This may create/update multiple products.")) {
+      return;
+    }
+
+    try {
+      setImportingCsv(true);
+      const res = await ProductAPI.importCsv(csvFile);
+      const data = res.data || {};
+      const errorText = (data.errors || []).slice(0, 6).join("\n");
+      alert(
+        `Import complete\nCreated: ${data.created || 0}\nUpdated: ${data.updated || 0}\nSkipped: ${data.skipped || 0}${errorText ? `\n\nErrors:\n${errorText}` : ""}`
+      );
+      setCsvFile(null);
+      setCsvPreview({ headers: [], rows: [] });
+      fetchProducts();
+    } catch (err) {
+      alert(err.response?.data?.message || "CSV import failed");
+    } finally {
+      setImportingCsv(false);
+    }
+  };
+
   return (
     <div className="dashboard">
       <div className="headerRow">
@@ -256,6 +367,62 @@ export default function ProductList() {
           }}
         />
       </div>
+
+      <div className="topControls" style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        <button type="button" className="editBtn" onClick={handleDownloadExport}>
+          Download CSV
+        </button>
+        <button type="button" className="editBtn" onClick={handleDownloadTemplate}>
+          Download Template
+        </button>
+
+        <input
+          type="file"
+          accept=".csv,text/csv"
+          className="form-control"
+          style={{ maxWidth: 320 }}
+          onChange={(e) => handleCsvSelect(e.target.files?.[0])}
+        />
+
+        <button
+          type="button"
+          className="addTopBtn"
+          onClick={handleImportCsv}
+          disabled={!csvFile || importingCsv}
+        >
+          {importingCsv ? "Importing..." : "Import CSV"}
+        </button>
+      </div>
+
+      {csvPreview.headers.length > 0 && (
+        <div className="tableWrapper" style={{ marginTop: 10 }}>
+          <h4 style={{ marginBottom: 8 }}>CSV Preview (first 8 rows)</h4>
+          <table className="product-table">
+            <thead>
+              <tr>
+                {csvPreview.headers.map((header, index) => (
+                  <th key={`${header}-${index}`}>{header || `Column ${index + 1}`}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {csvPreview.rows.length === 0 ? (
+                <tr>
+                  <td colSpan={csvPreview.headers.length}>No data rows found in selected file.</td>
+                </tr>
+              ) : (
+                csvPreview.rows.map((row, rowIndex) => (
+                  <tr key={`preview-${rowIndex}`}>
+                    {csvPreview.headers.map((_, colIndex) => (
+                      <td key={`preview-${rowIndex}-${colIndex}`}>{row[colIndex] || ""}</td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {showForm && (
         <div className="formBox">
