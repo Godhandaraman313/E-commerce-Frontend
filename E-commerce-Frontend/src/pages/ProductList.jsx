@@ -18,6 +18,7 @@ export default function ProductList() {
   const [inStock, setInStock] = useState(true);
   const [editId, setEditId] = useState(null);
   const [details, setDetails] = useState([]);
+  const [hashtags, setHashtags] = useState("");
   const [extraFiles, setExtraFiles] = useState(null);
   const [currentImageUrl, setCurrentImageUrl] = useState("");
   const [currentImages, setCurrentImages] = useState([]);
@@ -98,6 +99,7 @@ export default function ProductList() {
       inStock,
       brandId: brandId ? Number(brandId) : null,
       details,
+      hashtags: hashtags.trim() || null,
     };
 
     try {
@@ -132,6 +134,7 @@ export default function ProductList() {
       setDescription("");
       setInStock(true);
       setDetails([]);
+      setHashtags("");
       setExtraFiles(null);
       setEditId(null);
       setCurrentImageUrl("");
@@ -283,6 +286,12 @@ export default function ProductList() {
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
           />
+          <input
+            placeholder="Hashtags (comma-separated, e.g. gaming,laptop,tech)"
+            value={hashtags}
+            onChange={(e) => setHashtags(e.target.value)}
+            title="Comma-separated hashtags for related product discovery"
+          />
           <label>
             <input type="checkbox" checked={inStock} onChange={(e) => setInStock(e.target.checked)} />
             In stock
@@ -424,6 +433,7 @@ export default function ProductList() {
                         setDescription(p.description || "");
                         setInStock(p.inStock !== false);
                         setDetails(p.details || []);
+                        setHashtags(p.hashtags || "");
                         setExtraFiles(null);
                         setEditId(p.id);
                         setCurrentImageUrl(p.imageUrl || "");

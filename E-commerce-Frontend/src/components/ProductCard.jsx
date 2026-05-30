@@ -1,9 +1,26 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProductImageUrl } from "../utils/productImage";
+import { useCart } from "../context/CartContext";
 
 export default function ProductCard({ product, onAddToCart }) {
   const navigate = useNavigate();
   const imageUrl = getProductImageUrl(product, 320, 240);
+  const { cartItems, updateQuantity, removeItem } = useCart();
+  const [busy, setBusy] = useState(false);
+
+  // Find if this product is already in cart
+  const cartItem = cartItems.find((i) => i.productId === product.id);
+
+  const handleQtyChange = async (newQty) => {
+    setBusy(true);
+    if (newQty < 1) {
+      await removeItem(cartItem.id);
+    } else {
+      await updateQuantity(cartItem.id, newQty);
+    }
+    setBusy(false);
+  };
 
   const goToDetail = () => navigate(`/products/${product.id}`);
 
@@ -43,17 +60,41 @@ export default function ProductCard({ product, onAddToCart }) {
           <span className="shop-product-card__oos-badge">Out of Stock</span>
         )}
         <p className="shop-product-card__price">₹{product.price?.toLocaleString("en-IN")}</p>
-        <button
-          type="button"
-          className="shop-product-card__btn"
-          disabled={product.inStock === false}
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddToCart?.(product);
-          }}
-        >
-          {product.inStock === false ? "Out of Stock" : "Add to Cart"}
-        </button>
+
+        {cartItem ? (
+          <div
+            className="shop-product-card__qty d-inline-flex align-items-center border rounded overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-secondary rounded-0 px-2 py-1"
+              disabled={busy}
+              onClick={() => handleQtyChange(cartItem.quantity - 1)}
+              aria-label="Decrease"
+            >−</button>
+            <span className="px-3 fw-semibold small">{cartItem.quantity}</span>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-secondary rounded-0 px-2 py-1"
+              disabled={busy}
+              onClick={() => handleQtyChange(cartItem.quantity + 1)}
+              aria-label="Increase"
+            >+</button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="shop-product-card__btn"
+            disabled={product.inStock === false}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddToCart?.(product);
+            }}
+          >
+            {product.inStock === false ? "Out of Stock" : "Add to Cart"}
+          </button>
+        )}
       </div>
     </article>
   );

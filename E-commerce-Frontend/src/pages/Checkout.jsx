@@ -10,6 +10,7 @@ export default function Checkout() {
   const [placing, setPlacing] = useState(false);
   const navigate = useNavigate();
   const { fetchCart } = useCart();
+  const isLoggedIn = !!localStorage.getItem("token");
 
   useEffect(() => {
   const token = localStorage.getItem("token");
@@ -52,9 +53,11 @@ export default function Checkout() {
       <div className="container text-center mt-5">
         <h2>Checkout</h2>
         <p className="text-danger">{error}</p>
-        <button className="btn btn-primary" onClick={() => navigate("/login")}>
-          Login
-        </button>
+        {!isLoggedIn && (
+          <button className="btn btn-primary" onClick={() => navigate("/login")}>
+            Login
+          </button>
+        )}
         <button
           className="btn btn-secondary ms-2"
           onClick={() => navigate("/")}

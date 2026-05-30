@@ -4,6 +4,7 @@ import ProductReviews from "../components/ProductReviews";
 import { ProductAPI } from "../api/ApiServices";
 import { useCart } from "../context/CartContext";
 import ImageGallery from "../components/ImageGallery";
+import { getProductImageUrl } from "../utils/productImage";
 import "../styles/product-detail.css";
 
 export default function ProductDetail() {
@@ -14,6 +15,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
   const brandLogoUrl = (logoPath) => {
     if (!logoPath || logoPath === "default-logo.png") return null;
@@ -43,6 +45,32 @@ export default function ProductDetail() {
     return () => window.removeEventListener("product-reviewed", onReviewed);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // Fetch related products whenever the loaded product changes
+  useEffect(() => {
+    if (!product) return;
+    const tags = product.hashtags
+      ? product.hashtags.split(",").map((t) => t.trim()).filter(Boolean)
+      : [];
+    if (tags.length === 0) {
+      // Fall back to same category
+      ProductAPI.getAll({ category: product.category, size: 8, sort: "id,desc" })
+        .then((res) => {
+          const filtered = (res.data.content || []).filter((p) => String(p.id) !== String(id));
+          setRelatedProducts(filtered.slice(0, 6));
+        })
+        .catch(() => {});
+      return;
+    }
+    // Use first hashtag for the primary related query
+    ProductAPI.getAll({ hashtag: tags[0], size: 10, sort: "id,desc" })
+      .then((res) => {
+        const filtered = (res.data.content || []).filter((p) => String(p.id) !== String(id));
+        setRelatedProducts(filtered.slice(0, 6));
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id]);
 
   const handleAddToCart = async () => {
     if (!product) return;
@@ -132,6 +160,22 @@ export default function ProductDetail() {
                 ))}
               </tbody>
             </table>
+
+            {/* Hashtag chips */}
+            {product.hashtags && (
+              <div className="product-detail__hashtags mt-3 d-flex flex-wrap gap-1">
+                {product.hashtags.split(",").map((tag) => tag.trim()).filter(Boolean).map((tag) => (
+                  <span
+                    key={tag}
+                    className="badge rounded-pill border text-secondary bg-white"
+                    style={{ fontSize: "0.72rem", fontWeight: 400, cursor: "pointer" }}
+                    onClick={() => navigate(`/search?keyword=${encodeURIComponent(tag)}`)}
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <hr className="my-3" />
@@ -195,7 +239,55 @@ export default function ProductDetail() {
       </div>
 
       <hr className="my-5" />
-      
+
+      {/* Related Products Horizontal Scroll */}
+      {relatedProducts.length > 0 && (
+        <div className="product-detail__related mb-5">
+          <h5 className="fw-bold mb-3">Related Products</h5>
+          <div
+            className="product-detail__related-scroll"
+            style={{
+              display: "flex",
+              gap: "1rem",
+              overflowX: "auto",
+              paddingBottom: "0.75rem",
+              scrollbarWidth: "thin",
+            }}
+          >
+            {relatedProducts.map((p) => (
+              <div
+                key={p.id}
+                className="card border-0 shadow-sm flex-shrink-0"
+                style={{ width: 180, cursor: "pointer" }}
+                onClick={() => navigate(`/products/${p.id}`)}
+              >
+                <img
+                  src={getProductImageUrl(p, 180, 180)}
+                  alt={p.name}
+                  style={{ width: 180, height: 160, objectFit: "contain", padding: "0.5rem" }}
+                  onError={(e) => { e.target.style.opacity = "0.3"; }}
+                />
+                <div className="card-body p-2">
+                  <p className="mb-1 fw-semibold" style={{ fontSize: "0.8rem", lineHeight: 1.3 }}>
+                    {p.name.length > 40 ? p.name.slice(0, 38) + "…" : p.name}
+                  </p>
+                  <p className="mb-0 text-primary fw-bold" style={{ fontSize: "0.85rem" }}>
+                    ₹{p.price?.toLocaleString("en-IN")}
+                  </p>
+                  {p.hashtags && (
+                    <div className="d-flex flex-wrap gap-1 mt-1">
+                      {p.hashtags.split(",").slice(0, 2).map((t) => (
+                        <span key={t.trim()} className="badge bg-light text-muted border" style={{ fontSize: "0.65rem" }}>#{t.trim()}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Reviews Section Overhaul */}
       <div id="reviews" className="product-detail__reviews-section">
         <ProductReviews productId={product.id} />
