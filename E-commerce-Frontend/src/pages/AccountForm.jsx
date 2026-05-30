@@ -6,14 +6,20 @@ import "../styles/global.css"; // Ensure global styles apply
 const COUNTRY = "India";
 
 export default function AccountForm() {
-  const [form, setForm] = useState({});
+  const [form, setForm] = useState({
+    firstName: "", lastName: "", email: "",
+    phoneNumber: "", addressLine1: "",
+    city: "", postalCode: "",
+    state: "", district: "",
+    country: COUNTRY,
+  });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     AccountAPI.getAccount()
-      .then((acc) => setForm(acc.data))
+      .then((acc) => setForm((prev) => ({ ...prev, ...acc.data, country: COUNTRY })))
       .catch(() => alert("Failed to load data"))
       .finally(() => setLoading(false));
   }, []);
@@ -35,7 +41,7 @@ export default function AccountForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await AccountAPI.updateAccount(form);
+      await AccountAPI.updateAccount({ ...form, country: COUNTRY });
       setMessage("Account updated successfully");
       setIsEditing(false);
     } catch {

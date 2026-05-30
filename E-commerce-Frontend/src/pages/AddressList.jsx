@@ -204,10 +204,11 @@ export default function AddressList() {
                   )}
 
                   {primaryAddress.city},{" "}
+                  {primaryAddress.district && <>{primaryAddress.district}, </>}
                   {primaryAddress.state}
                   <br />
 
-                  {primaryAddress.country} -{" "}
+                  {"India"} -{" "}
                   {primaryAddress.postalCode}
                   <br />
 
@@ -271,10 +272,11 @@ export default function AddressList() {
                   )}
 
                   {address.city},{" "}
+                  {address.district && <>{address.district}, </>}
                   {address.state}
                   <br />
 
-                  {address.country} -{" "}
+                  {"India"} -{" "}
                   {address.postalCode}
                   <br />
 

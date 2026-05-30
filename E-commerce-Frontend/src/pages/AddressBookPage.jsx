@@ -25,8 +25,9 @@ export default function AddressBookPage() {
           addressLine2: a.addressLine2 || "",
           city: a.city,
           state: a.state || "",
+          district: a.district || "",
           postalCode: a.postalCode,
-          country: a.country || "",
+          country: "India",
           defaultForShipping: a.defaultForShipping,
         });
       })
@@ -41,10 +42,11 @@ export default function AddressBookPage() {
       phoneNumber: form.phoneNumber,
       addressLine1: form.addressLine1,
       addressLine2: form.addressLine2 || "",
-      state: form.state || "",
       city: form.city,
-      country: form.country,
+      state: form.state || "",
+      district: form.district || "",
       postalCode: form.postalCode,
+      country: "India",
       defaultForShipping: form.defaultForShipping,
     };
 
