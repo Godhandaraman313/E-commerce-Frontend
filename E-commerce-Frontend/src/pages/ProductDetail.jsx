@@ -17,6 +17,11 @@ export default function ProductDetail() {
   const [error, setError] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
+  const parseHashtags = (value) => {
+    if (!value || typeof value !== "string") return [];
+    return value.split(",").map((t) => t.trim()).filter(Boolean);
+  };
+
   const brandLogoUrl = (logoPath) => {
     if (!logoPath || logoPath === "default-logo.png") return null;
     return logoPath.startsWith("http") ? logoPath : `http://localhost:8282${logoPath}`;
@@ -49,14 +54,12 @@ export default function ProductDetail() {
   // Fetch related products whenever the loaded product changes
   useEffect(() => {
     if (!product) return;
-    const tags = product.hashtags
-      ? product.hashtags.split(",").map((t) => t.trim()).filter(Boolean)
-      : [];
+    const tags = parseHashtags(product.hashtags);
     if (tags.length === 0) {
       // Fall back to same category
       ProductAPI.getAll({ category: product.category, size: 8, sort: "id,desc" })
         .then((res) => {
-          const filtered = (res.data.content || []).filter((p) => String(p.id) !== String(id));
+          const filtered = (res.data.content || []).filter((p) => p && p.id != null && String(p.id) !== String(id));
           setRelatedProducts(filtered.slice(0, 6));
         })
         .catch(() => {});
@@ -65,7 +68,7 @@ export default function ProductDetail() {
     // Use first hashtag for the primary related query
     ProductAPI.getAll({ hashtag: tags[0], size: 10, sort: "id,desc" })
       .then((res) => {
-        const filtered = (res.data.content || []).filter((p) => String(p.id) !== String(id));
+        const filtered = (res.data.content || []).filter((p) => p && p.id != null && String(p.id) !== String(id));
         setRelatedProducts(filtered.slice(0, 6));
       })
       .catch(() => {});
@@ -164,7 +167,7 @@ export default function ProductDetail() {
             {/* Hashtag chips */}
             {product.hashtags && (
               <div className="product-detail__hashtags mt-3 d-flex flex-wrap gap-1">
-                {product.hashtags.split(",").map((tag) => tag.trim()).filter(Boolean).map((tag) => (
+                {parseHashtags(product.hashtags).map((tag) => (
                   <span
                     key={tag}
                     className="badge rounded-pill border text-secondary bg-white"
@@ -254,7 +257,7 @@ export default function ProductDetail() {
               scrollbarWidth: "thin",
             }}
           >
-            {relatedProducts.map((p) => (
+            {relatedProducts.filter((p) => p && p.id != null).map((p) => (
               <div
                 key={p.id}
                 className="card border-0 shadow-sm flex-shrink-0"
@@ -276,8 +279,8 @@ export default function ProductDetail() {
                   </p>
                   {p.hashtags && (
                     <div className="d-flex flex-wrap gap-1 mt-1">
-                      {p.hashtags.split(",").slice(0, 2).map((t) => (
-                        <span key={t.trim()} className="badge bg-light text-muted border" style={{ fontSize: "0.65rem" }}>#{t.trim()}</span>
+                      {parseHashtags(p.hashtags).slice(0, 2).map((tag) => (
+                        <span key={tag} className="badge bg-light text-muted border" style={{ fontSize: "0.65rem" }}>#{tag}</span>
                       ))}
                     </div>
                   )}

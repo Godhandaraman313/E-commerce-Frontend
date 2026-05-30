@@ -4,13 +4,17 @@ import { getProductImageUrl } from "../utils/productImage";
 import { useCart } from "../context/CartContext";
 
 export default function ProductCard({ product, onAddToCart }) {
+  if (!product || product.id == null) {
+    return null;
+  }
+
   const navigate = useNavigate();
   const imageUrl = getProductImageUrl(product, 320, 240);
   const { cartItems, updateQuantity, removeItem } = useCart();
   const [busy, setBusy] = useState(false);
 
   // Find if this product is already in cart
-  const cartItem = cartItems.find((i) => i.productId === product.id);
+  const cartItem = (cartItems || []).find((i) => i.productId === product.id);
 
   const handleQtyChange = async (newQty) => {
     setBusy(true);

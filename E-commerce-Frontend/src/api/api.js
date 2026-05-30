@@ -46,6 +46,7 @@ API.interceptors.response.use(
   (error) => {
 
     const status = error?.response?.status;
+    const requestUrl = error?.config?.url || "";
 
     // =========================================
     // UNAUTHORIZED
@@ -65,10 +66,15 @@ API.interceptors.response.use(
     // =========================================
 
     if (status === 403) {
+      const isCartOrCheckout =
+        requestUrl.includes("/api/cart") ||
+        requestUrl.includes("/api/checkout");
 
-      console.error(
-        "Forbidden - You do not have permission"
-      );
+      if (!isCartOrCheckout) {
+        console.error(
+          "Forbidden - You do not have permission"
+        );
+      }
     }
 
     // =========================================

@@ -21,8 +21,19 @@ export function CartProvider({ children }) {
     return !!(token && token !== "undefined" && token !== "null");
   };
 
+  const isCartEnabledForSession = () => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (!raw) return true;
+      const user = JSON.parse(raw);
+      return (user?.role || "").toUpperCase() !== "ADMIN";
+    } catch {
+      return true;
+    }
+  };
+
   const fetchCart = useCallback(async () => {
-    if (!isLoggedIn()) {
+    if (!isLoggedIn() || !isCartEnabledForSession()) {
       setCartItems([]);
       return;
     }
@@ -45,6 +56,11 @@ export function CartProvider({ children }) {
   const addToCart = async (product) => {
     if (!isLoggedIn()) {
       alert("Please login to add items to cart");
+      return false;
+    }
+
+    if (!isCartEnabledForSession()) {
+      alert("Cart is not available for this account");
       return false;
     }
 
