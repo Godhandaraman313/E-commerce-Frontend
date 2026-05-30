@@ -1,32 +1,34 @@
-import { useEffect, useState } from "react";
-import { AccountAPI, CountryAPI } from "../api/ApiServices.js";
+import { useEffect, useMemo, useState } from "react";
+import { AccountAPI } from "../api/ApiServices.js";
+import indiaStatesDistricts from "../data/indiaStatesDistricts";
 import "../styles/global.css"; // Ensure global styles apply
+
+const COUNTRY = "India";
 
 export default function AccountForm() {
   const [form, setForm] = useState({});
-  const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      AccountAPI.getAccount(),
-      CountryAPI.getAll()
-    ])
-      .then(([acc, countries]) => {
-        setForm(acc.data);
-        setCountries(countries.data);
-      })
+    AccountAPI.getAccount()
+      .then((acc) => setForm(acc.data))
       .catch(() => alert("Failed to load data"))
       .finally(() => setLoading(false));
   }, []);
+
+  const districts = useMemo(() => {
+    const entry = indiaStatesDistricts.find((s) => s.state === form.state);
+    return entry ? entry.districts : [];
+  }, [form.state]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "state" ? { district: "" } : {}),
     }));
   };
 
@@ -92,10 +94,16 @@ export default function AccountForm() {
                 <span className="fw-medium">{form.postalCode || "—"}</span>
               </div>
               <div className="col-md-4 border-bottom pb-3">
+                <span className="text-muted d-block text-uppercase" style={{ fontSize: "0.75rem", letterSpacing: "1px" }}>State</span>
+                <span className="fw-medium">{form.state || "—"}</span>
+              </div>
+              <div className="col-md-4 border-bottom pb-3">
+                <span className="text-muted d-block text-uppercase" style={{ fontSize: "0.75rem", letterSpacing: "1px" }}>District</span>
+                <span className="fw-medium">{form.district || "—"}</span>
+              </div>
+              <div className="col-md-4 border-bottom pb-3">
                 <span className="text-muted d-block text-uppercase" style={{ fontSize: "0.75rem", letterSpacing: "1px" }}>Country</span>
-                <span className="fw-medium">
-                  {countries.find(c => c.id.toString() === form.country?.toString())?.name || form.country || "—"}
-                </span>
+                <span className="fw-medium">{COUNTRY}</span>
               </div>
             </div>
           ) : (
@@ -130,10 +138,23 @@ export default function AccountForm() {
               </div>
               <div className="col-md-4">
                 <label className="form-label text-muted text-uppercase" style={{ fontSize: "0.75rem" }}>Country</label>
-                <select name="country" value={form.country || ""} onChange={handleChange} className="form-control rounded-0">
-                  <option value="">Select</option>
-                  {countries.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                <input value={COUNTRY} readOnly className="form-control rounded-0 bg-light text-muted fw-semibold" />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label text-muted text-uppercase" style={{ fontSize: "0.75rem" }}>State</label>
+                <select name="state" value={form.state || ""} onChange={handleChange} className="form-select rounded-0">
+                  <option value="">Select State</option>
+                  {indiaStatesDistricts.map((s) => (
+                    <option key={s.state} value={s.state}>{s.state}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-md-6">
+                <label className="form-label text-muted text-uppercase" style={{ fontSize: "0.75rem" }}>District</label>
+                <select name="district" value={form.district || ""} onChange={handleChange} className="form-select rounded-0" disabled={!form.state}>
+                  <option value="">{form.state ? "Select District" : "Select State First"}</option>
+                  {districts.map((d) => (
+                    <option key={d} value={d}>{d}</option>
                   ))}
                 </select>
               </div>

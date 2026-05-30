@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { CountryAPI } from "../api/ApiServices";
+import indiaStatesDistricts from "../data/indiaStatesDistricts";
+
+const COUNTRY = "India";
 
 export default function AddressForm({ initialData = {}, onSubmit }) {
   const [form, setForm] = useState({
@@ -12,31 +14,31 @@ export default function AddressForm({ initialData = {}, onSubmit }) {
     addressLine2: "",
     city: "",
     state: "",
+    district: "",
     postalCode: "",
-    country: "",
+    country: COUNTRY,
     defaultForShipping: false,
     ...initialData,
   });
 
-  const [countries, setCountries] = useState([]);
-
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
-      setForm((prev) => ({ ...prev, ...initialData }));
+      setForm((prev) => ({ ...prev, ...initialData, country: COUNTRY }));
     }
   }, [initialData]);
 
-  useEffect(() => {
-    CountryAPI.getAll()
-      .then((res) => setCountries(res.data || []))
-      .catch(() => setCountries([]));
-  }, []);
+  const districts = useMemo(() => {
+    const entry = indiaStatesDistricts.find((s) => s.state === form.state);
+    return entry ? entry.districts : [];
+  }, [form.state]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+      // Reset district when state changes
+      ...(name === "state" ? { district: "" } : {}),
     }));
   };
 
@@ -127,30 +129,49 @@ export default function AddressForm({ initialData = {}, onSubmit }) {
             />
           </div>
           <div className="col-md-4">
-            <label className="form-label text-muted text-uppercase" style={{ fontSize: "0.75rem" }}>State</label>
-            <input
+            <label className="form-label text-muted text-uppercase" style={{ fontSize: "0.75rem" }}>State *</label>
+            <select
               name="state"
               value={form.state}
               onChange={handleChange}
-              className="form-control rounded-0"
-            />
-          </div>
-          <div className="col-md-4">
-            <label className="form-label text-muted text-uppercase" style={{ fontSize: "0.75rem" }}>Country *</label>
-            <select
-              name="country"
-              value={form.country}
-              onChange={handleChange}
-              className="form-control rounded-0"
+              className="form-select rounded-0"
               required
             >
-              <option value="">Select country</option>
-              {countries.map((c) => (
-                <option key={c.id} value={c.name}>
-                  {c.name}
+              <option value="">Select State</option>
+              {indiaStatesDistricts.map((s) => (
+                <option key={s.state} value={s.state}>
+                  {s.state}
                 </option>
               ))}
             </select>
+          </div>
+          <div className="col-md-4">
+            <label className="form-label text-muted text-uppercase" style={{ fontSize: "0.75rem" }}>District *</label>
+            <select
+              name="district"
+              value={form.district}
+              onChange={handleChange}
+              className="form-select rounded-0"
+              required
+              disabled={!form.state}
+            >
+              <option value="">
+                {form.state ? "Select District" : "Select State First"}
+              </option>
+              {districts.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="col-md-4">
+            <label className="form-label text-muted text-uppercase" style={{ fontSize: "0.75rem" }}>Country</label>
+            <input
+              value={COUNTRY}
+              readOnly
+              className="form-control rounded-0 bg-light text-muted fw-semibold"
+            />
           </div>
 
           <div className="col-12 mt-4">
