@@ -62,45 +62,62 @@ export default function Header({ user, handleLogout }) {
           </div>
 
           <ul className="navbar-nav ms-auto align-items-center">
-            <li className="nav-item me-3">
-              <Link className="nav-link d-flex align-items-center gap-1" to="/cart">
-                <span style={{ fontSize: "1.2rem" }}>🛒</span> Cart 
-                {cartCount > 0 && <span className="badge bg-warning text-dark ms-1 rounded-pill">{cartCount}</span>}
-              </Link>
-            </li>
+            {!isAdmin() && (
+              <li className="nav-item me-3">
+                <Link className="nav-link d-flex align-items-center gap-1" to="/cart">
+                  <span style={{ fontSize: "1.2rem" }}>🛒</span> Cart 
+                  {cartCount > 0 && <span className="badge bg-warning text-dark ms-1 rounded-pill">{cartCount}</span>}
+                </Link>
+              </li>
+            )}
+
+            {user && !isAdmin() && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/checkout">
+                  Checkout
+                </Link>
+              </li>
+            )}
 
             {user && (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/account">
-                    Account
-                  </Link>
-                </li>
-
-                <li className="nav-item">
-                  <Link className="nav-link" to="/address-book">
-                    Address
-                  </Link>
-                </li>
-
-                <li className="nav-item">
-                  <Link className="nav-link" to="/checkout">
-                    Checkout
-                  </Link>
-                </li>
-
-                <li className="nav-item">
-                  <Link className="nav-link" to="/orders">
-                    My Orders
-                  </Link>
-                </li>
-
-                <li className="nav-item">
-                  <Link className="nav-link" to="/my-reviews">
-                    My Reviews
-                  </Link>
-                </li>
-              </>
+              <li className="nav-item dropdown">
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  id="settingsDropdown"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Settings
+                </a>
+                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                  <li>
+                    <Link className="dropdown-item" to="/account">
+                      Account
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="/address-book">
+                      Address
+                    </Link>
+                  </li>
+                  {!isAdmin() && (
+                    <>
+                      <li>
+                        <Link className="dropdown-item" to="/orders">
+                          My Orders
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="dropdown-item" to="/my-reviews">
+                          My Reviews
+                        </Link>
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </li>
             )}
           </ul>
 

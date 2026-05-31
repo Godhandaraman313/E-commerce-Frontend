@@ -110,7 +110,9 @@ export const OrderAPI = {
   list: (params) => API.get("/api/orders", { params }),
   getById: (id) => API.get(`/api/orders/${id}`),
   place: (data) => API.post("/api/orders", data),
-  requestReturn: (id, data) => API.post(`/api/orders/${id}/return`, data),
+  requestReturn: (id, data) => API.post(`/api/orders/${id}/return`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  }),
 };
 
 /* ================= ADMIN ORDERS (Shopme BackEnd shipper) ================= */

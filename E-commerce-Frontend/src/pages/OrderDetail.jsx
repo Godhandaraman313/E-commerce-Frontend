@@ -9,10 +9,13 @@ export default function OrderDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
-  const [showReturnForm, setShowReturnForm] = useState(false);
-  const [returnReason, setReturnReason] = useState("");
-  const [returnNote, setReturnNote] = useState("");
-  const [submittingReturn, setSubmittingReturn] = useState(false);
+  const [showIssueForm, setShowIssueForm] = useState(false);
+  const [issueType, setIssueType] = useState("");
+  const [issueReason, setIssueReason] = useState("");
+  const [customReason, setCustomReason] = useState("");
+  const [issueNote, setIssueNote] = useState("");
+  const [issuePhotos, setIssuePhotos] = useState([]);
+  const [submittingIssue, setSubmittingIssue] = useState(false);
 
   const loadOrder = () => {
     Promise.resolve().then(() => setLoading(true));
@@ -27,22 +30,45 @@ export default function OrderDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const submitReturn = async (e) => {
+  const getReasonOptions = () => {
+    if (issueType === "REFUND") return [{ value: "Damaged product", label: "Damaged product" }, { value: "Other", label: "Other" }];
+    if (issueType === "RETURN") return [{ value: "Not same as ordered", label: "Not same as ordered" }, { value: "Other", label: "Other" }];
+    if (issueType === "REPLACEMENT") return [{ value: "Damaged product", label: "Damaged product" }, { value: "Expired product", label: "Expired product" }, { value: "Other", label: "Other" }];
+    return [];
+  };
+
+  const submitIssue = async (e) => {
     e.preventDefault();
-    if (!returnReason.trim()) {
-      alert("Please select a return reason");
+    if (!issueType) {
+      alert("Please select an issue type");
       return;
     }
-    setSubmittingReturn(true);
+    if (!issueReason.trim()) {
+      alert("Please select a reason");
+      return;
+    }
+    const finalReason = issueReason === "Other" ? customReason.trim() : issueReason;
+    if (!finalReason) {
+      alert("Please provide a custom reason for 'Other'");
+      return;
+    }
+    setSubmittingIssue(true);
     try {
-      await OrderAPI.requestReturn(id, { reason: returnReason, note: returnNote });
-      setShowReturnForm(false);
+      const formData = new FormData();
+      formData.append("type", issueType);
+      formData.append("reason", finalReason);
+      if (issueNote) formData.append("note", issueNote);
+      issuePhotos.forEach((file) => formData.append("photos", file));
+      await OrderAPI.requestReturn(id, formData);
+      setShowIssueForm(false);
+      setIssuePhotos([]);
+      setCustomReason("");
       loadOrder();
-      alert("Return request submitted");
+      alert("Issue request submitted");
     } catch (err) {
-      alert(err.response?.data?.message || "Return request failed");
+      alert(err.response?.data?.message || "Request failed");
     } finally {
-      setSubmittingReturn(false);
+      setSubmittingIssue(false);
     }
   };
 
@@ -94,7 +120,7 @@ export default function OrderDetail() {
 
             {order.returnRequested && (
               <div className="alert alert-warning mt-3">
-                <b>Return requested</b>
+                <b>Issue requested ({order.issueType || "RETURN"})</b>
                 <br />
                 Reason: {order.returnReason}
                 {order.returnNote && (
@@ -103,50 +129,101 @@ export default function OrderDetail() {
                     Note: {order.returnNote}
                   </>
                 )}
+                {order.issuePhotos?.length > 0 && (
+                  <div className="mt-2">
+                    <b>Photos:</b>
+                    <div className="d-flex flex-wrap gap-2 mt-1">
+                      {order.issuePhotos.map((url, idx) => (
+                        <a key={idx} href={url} target="_blank" rel="noopener noreferrer">
+                          <img src={url} alt={`Issue photo ${idx + 1}`} style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 4, border: "1px solid #ddd" }} />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
-            {order.canRequestReturn && !showReturnForm && (
+            {order.canRequestReturn && !showIssueForm && (
               <button
                 type="button"
                 className="btn btn-outline-danger mt-3"
-                onClick={() => setShowReturnForm(true)}
+                onClick={() => setShowIssueForm(true)}
               >
-                Request Return
+                Report Issue
               </button>
             )}
 
-            {showReturnForm && (
-              <form className="mt-3 border rounded p-3" onSubmit={submitReturn}>
-                <h5>Return This Order</h5>
+            {showIssueForm && (
+              <form className="mt-3 border rounded p-3" onSubmit={submitIssue}>
+                <h5>Report an Issue</h5>
                 <select
                   className="form-select mb-2"
-                  value={returnReason}
-                  onChange={(e) => setReturnReason(e.target.value)}
+                  value={issueType}
+                  onChange={(e) => {
+                    setIssueType(e.target.value);
+                    setIssueReason("");
+                  }}
                   required
                 >
-                  <option value="">Select reason</option>
-                  <option value="Defective product">Defective product</option>
-                  <option value="Wrong item received">Wrong item received</option>
-                  <option value="Item not as described">Item not as described</option>
-                  <option value="Changed my mind">Changed my mind</option>
-                  <option value="Other">Other</option>
+                  <option value="">Select Issue Type</option>
+                  <option value="REFUND">Refund</option>
+                  <option value="RETURN">Return</option>
+                  <option value="REPLACEMENT">Replacement</option>
                 </select>
+                
+                {issueType && (
+                  <select
+                    className="form-select mb-2"
+                    value={issueReason}
+                    onChange={(e) => setIssueReason(e.target.value)}
+                    required
+                  >
+                    <option value="">Select reason</option>
+                    {getReasonOptions().map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                )}
+                {issueReason === "Other" && (
+                  <input
+                    type="text"
+                    className="form-control mb-2"
+                    placeholder="Specify custom reason"
+                    value={customReason}
+                    onChange={(e) => setCustomReason(e.target.value)}
+                    required
+                  />
+                )}
+
                 <textarea
                   className="form-control mb-2"
                   placeholder="Additional notes (optional)"
                   rows={3}
-                  value={returnNote}
-                  onChange={(e) => setReturnNote(e.target.value)}
+                  value={issueNote}
+                  onChange={(e) => setIssueNote(e.target.value)}
                 />
+                <div className="mb-2">
+                  <label className="form-label"><b>Attach Photos</b> (optional)</label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => setIssuePhotos(Array.from(e.target.files))}
+                  />
+                  {issuePhotos.length > 0 && (
+                    <small className="text-muted">{issuePhotos.length} file(s) selected</small>
+                  )}
+                </div>
                 <div className="d-flex gap-2">
-                  <button type="submit" className="btn btn-danger" disabled={submittingReturn}>
-                    {submittingReturn ? "Submitting..." : "Submit Return Request"}
+                  <button type="submit" className="btn btn-danger" disabled={submittingIssue}>
+                    {submittingIssue ? "Submitting..." : "Submit Request"}
                   </button>
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={() => setShowReturnForm(false)}
+                    onClick={() => setShowIssueForm(false)}
                   >
                     Cancel
                   </button>
